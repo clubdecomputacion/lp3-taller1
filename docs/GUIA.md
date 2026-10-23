@@ -30,95 +30,24 @@ Construir una **API REST** sencilla para gestionar videos usando **Flask**, **Fl
 
 Esta es la hoja de ruta que seguiremos. Haz un `commit` al terminar cada paso:
 
-1. Crear el directorio del proyecto.
-2. Entorno virtual e instalación de dependencias.
-3. Preparar el proyecto para Git.
-4. Estructura de directorios.
-5. Configuración de la aplicación.
-6. Modelo de datos.
-7. Application factory y punto de entrada.
-8. Recurso REST `Video`.
-9. Congelar dependencias.
-10. Ejecutar y probar la API.
-11. Documentar las pruebas.
-12. Implementar una mejora.
-13. Ajustar el README.
+1. Estructura del Proyecto
+2. Configuración de la aplicación.
+3. Modelo de datos.
+4. Application factory y punto de entrada.
+5. Recurso REST `Video`.
+6. Congelar dependencias.
+7. Ejecutar y probar la API.
+8. Documentar las pruebas.
+9. Implementar una mejora.
+10. Ajustar el README.
 
----
 
-## Paso 1 — Crear el directorio del proyecto
+## Paso 1 — Estructura del Proyecto
 
-```bash
-mkdir api-videos
-cd api-videos
-```
-
-A partir de aquí, **todos los comandos se ejecutan dentro de `api-videos/`**.
-
----
-
-## Paso 2 — Entorno virtual e instalación de dependencias
-
-Un entorno virtual evita que las librerías de este proyecto se mezclen con
-las de otros proyectos o con las del sistema.
-
-```bash
-# Crear el entorno virtual (se creará una carpeta venv/)
-python3 -m venv venv
-
-# Activarlo (Linux/WSL2)
-source venv/bin/activate
-```
-
-Cuando el entorno está activo, verás el prefijo `(venv)` al inicio de tu
-línea de comandos. A partir de ahí, instala las dependencias:
-
-```bash
-pip install flask flask-restful flask-sqlalchemy
-```
-
-| Paquete            | Para qué se usa                                              |
-|--------------------|--------------------------------------------------------------|
-| `flask`            | Framework web base                                           |
-| `flask-restful`    | Extensión para construir APIs REST con clases `Resource`     |
-| `flask-sqlalchemy` | Integra el ORM SQLAlchemy con Flask (modelos y base de datos)|
-
-Verifica la instalación:
-
-```bash
-python3 -c "import flask, flask_restful, flask_sqlalchemy; print('Todo instalado')"
-```
-
-> Recuerda: cada vez que abras una nueva terminal para trabajar en este proyecto, debes volver a activar el entorno con `source venv/bin/activate`. Para salir del entorno usa `deactivate`.
-
----
-
-## Paso 3 — Preparar el proyecto para Git
-
-Crea un repositorio local con `git init` o clona un repositorio remoto con `git clone ...`.
-
-Antes de tu primer `commit`, crea el archivo `.gitignore` en la raíz del proyecto para que Git ignore lo que **no** debe versionarse (el entorno virtual, los archivos compilados de Python y la base de datos):
+Este proyecto usa una estructura típica de un proyecto Flask pequeño, basada en el patrón *application factory* (una función que construye la app). Esto facilita crecer el proyecto más adelante (agregar pruebas, más recursos, configuración por ambiente, etc.).
 
 ```
-venv/
-__pycache__/
-*.pyc
-instance/
-.env
-```
-
-> A lo largo del taller haz **un `commit` por cada paso o ajuste** que realices, con un mensaje que describa lo que hiciste (por ejemplo: `feat: modelo VideoModel`).
-
----
-
-## Paso 4 — Estructura de directorios
-
-Vamos a usar una estructura típica de un proyecto Flask pequeño, basada en el patrón *application factory* (una función que construye la app). Esto facilita crecer el proyecto más adelante (agregar pruebas, más recursos, configuración por ambiente, etc.).
-
-Crea la siguiente estructura (puedes usar `mkdir -p` o crear las carpetas desde tu editor):
-
-```
-api-videos/
+lp3-taller1/
 ├── app/
 │   ├── __init__.py          # Application factory (create_app)
 │   ├── config.py            # Configuración por ambiente
@@ -128,24 +57,18 @@ api-videos/
 │   └── resources/
 │       ├── __init__.py
 │       └── video.py         # Recurso REST Video (GET, PUT, PATCH, DELETE)
-├── instance/                 # Base de datos SQLite (se crea sola, no se versiona)
-├── venv/                     # Entorno virtual (no se versiona)
+├── instance/                # Base de datos SQLite (se crea sola, no se versiona)
+├── venv/                    # Entorno virtual (no se versiona)
 ├── requirements.txt
-├── run.py                    # Punto de entrada de la aplicación
+├── run.py                   # Punto de entrada de la aplicación
 ├── .gitignore
 ├── README.md
 └── docs/
-    ├── GUIA.md               # Este documento
-    └── PRUEBAS.md            # Pruebas realizadas (lo creas tú en el Paso 11)
+    ├── GUIA.md              # Este documento
+    └── PRUEBAS.md           # Pruebas realizadas (lo creas tú en el Paso 8)
 ```
 
-Comando rápido para crear las carpetas necesarias:
-
-```bash
-mkdir -p app/models app/resources docs
-```
-
-> La carpeta `instance/` **no** la creas tú: Flask-SQLAlchemy la genera automáticamente la primera vez que se crea la base de datos.
+> El directorio `instance/` **no** la creas tú: Flask-SQLAlchemy la genera automáticamente la primera vez que se crea la base de datos.
 
 Los archivos de partida de los pasos siguientes ya existen en el proyecto con comentarios `# TODO` que debes completar. Para ver rápidamente todo lo que te falta por hacer, ejecuta desde la raíz del proyecto:
 
@@ -153,9 +76,8 @@ Los archivos de partida de los pasos siguientes ya existen en el proyecto con co
 grep -rn "TODO" app run.py
 ```
 
----
 
-## Paso 5 — Configuración de la aplicación
+## Paso 2 — Configuración de la aplicación
 
 El archivo `app/config.py` define una clase de configuración por cada ambiente:
 
@@ -174,9 +96,8 @@ FLASK_CONFIG=testing python3 run.py
 
 Este archivo **ya está completo** en el proyecto de partida; solo léelo y entiende para qué sirve cada parámetro (`DEBUG`, `SQLALCHEMY_DATABASE_URI`, `SQLALCHEMY_TRACK_MODIFICATIONS`).
 
----
 
-## Paso 6 — Modelo de datos
+## Paso 3 — Modelo de datos
 
 Un **modelo** es una clase de Python que representa una tabla de la base de datos: cada atributo es una columna y cada objeto es una fila.
 
@@ -202,9 +123,8 @@ Debes:
 
 La columna `id` y el método `__repr__` ya están escritos para que los tomes de ejemplo.
 
----
 
-## Paso 7 — Application factory y punto de entrada
+## Paso 4 — Application factory y punto de entrada
 
 ### `app/__init__.py`
 
@@ -227,9 +147,8 @@ Ya crea la aplicación leyendo `FLASK_CONFIG`. Debes:
 
 Revisa los archivos `app/__init__.py` y `run.py` del proyecto de partida: cada `# TODO` indica exactamente qué línea o bloque de código debes escribir.
 
----
 
-## Paso 8 — Recurso REST `Video`
+## Paso 5 — Recurso REST `Video`
 
 En Flask-RESTful, un **recurso** es una clase que hereda de `Resource` y define un método de Python por cada método HTTP que acepta la ruta. Nuestra API tiene un único recurso, `Video`, en la ruta `/api/videos/<video_id>`:
 
@@ -283,9 +202,8 @@ Debes completar:
 
 Cada `# TODO` del archivo de partida indica exactamente qué línea o bloque debes escribir.
 
----
 
-## Paso 9 — Congelar dependencias
+## Paso 6 — Congelar dependencias
 
 Una vez tengas todo instalado y tu proyecto funcionando, guarda las dependencias exactas del proyecto en `requirements.txt`:
 
@@ -299,9 +217,8 @@ Esto permite que cualquier otra persona (o tú mismo en otro computador) recree 
 pip install -r requirements.txt
 ```
 
----
 
-## Paso 10 — Ejecutar y probar la API
+## Paso 7 — Ejecutar y probar la API
 
 Con el entorno virtual activado y parado en la raíz del proyecto:
 
@@ -352,7 +269,7 @@ curl -i -X PATCH http://127.0.0.1:5000/api/videos/1 \
      -d '{"views": 2500, "likes": 200}'
 ```
 
-Prueba también que el valor `0` se actualiza correctamente (si no lo hace, revisa el consejo del `is not None` del Paso 8):
+Prueba también que el valor `0` se actualiza correctamente (si no lo hace, revisa el consejo del `is not None` del Paso 5):
 
 ```bash
 curl -i -X PATCH http://127.0.0.1:5000/api/videos/1 \
@@ -389,9 +306,8 @@ Vuelve a consultarlo con `GET`: ahora debe responder `404`.
 
 **6. Verificar la persistencia:** crea un video, detén el servidor con `Ctrl+C`, vuelve a iniciarlo con `python3 run.py` y consulta el video con `GET`. Debe seguir existiendo, porque los datos están guardados en `instance/database.db`.
 
----
 
-## Paso 11 — Documentar las pruebas
+## Paso 8 — Documentar las pruebas
 
 Crea el archivo `docs/PRUEBAS.md` y documenta las pruebas que realizaste. Debes incluir **al menos una prueba exitosa por cada método** (`GET`, `PUT`, `PATCH`, `DELETE`) y **al menos un caso de error** por cada código `400`, `404` y `409`.
 
@@ -422,9 +338,8 @@ Para cada prueba registra la solicitud, el código esperado, el código obtenido
 - ...
 ````
 
----
 
-## Paso 12 — Implementar una mejora
+## Paso 9 — Implementar una mejora
 
 Elige y desarrolla **una (1)** de las siguientes sugerencias de mejora:
 
@@ -455,11 +370,10 @@ Elige y desarrolla **una (1)** de las siguientes sugerencias de mejora:
    - Dockerizar la aplicación.
    - Configurar para entornos de producción.
 
-Haz el trabajo en `commits` separados, actualiza `requirements.txt` si instalaste nuevas librerías y describe la mejora en tu README (ver Paso 13).
+Haz el trabajo en `commits` separados, actualiza `requirements.txt` si instalaste nuevas librerías y describe la mejora en tu README (ver Paso 10).
 
----
 
-## Paso 13 — Ajustar el README
+## Paso 10 — Ajustar el README
 
 El `README.md` del proyecto de partida contiene texto de relleno (*Lorem ipsum*). Reemplázalo por información real de **tu** proyecto:
 
@@ -478,7 +392,7 @@ El `README.md` del proyecto de partida contiene texto de relleno (*Lorem ipsum*)
 ## Checklist final
 
 - [ ] El entorno virtual se activa sin errores y las tres dependencias están instaladas.
-- [ ] La estructura de carpetas coincide con la propuesta y existe el `.gitignore`.
+- [ ] La estructura de directorios coincide con la propuesta y existe el `.gitignore`.
 - [ ] `VideoModel` define las columnas `name`, `views` y `likes`.
 - [ ] `create_app()` crea la app, carga la configuración, inicializa la base de datos, registra el recurso y crea las tablas.
 - [ ] `GET /api/videos/<id>` retorna el video (`200`) o `404` si no existe.
@@ -492,3 +406,4 @@ El `README.md` del proyecto de partida contiene texto de relleno (*Lorem ipsum*)
 - [ ] Una (1) mejora implementada y descrita en el README.
 - [ ] El README está ajustado con tus datos y no queda texto *Lorem ipsum*.
 - [ ] Hay un `commit` por cada paso o ajuste realizado.
+
